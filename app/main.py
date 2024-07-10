@@ -29,7 +29,7 @@ def handle_client(connect):
         for line in data[1:-2]:
             if not line:
                 break
-            key,value = line.split(":")
+            key,value = line.split(":",1)
             headers[key] = value
         body = data[-1]
         if method == "GET":
