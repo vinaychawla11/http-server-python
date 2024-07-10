@@ -33,13 +33,14 @@ def handle_client(connect):
             headers[key] = value
         body = data[-1]
         encoding = headers.get("Accept-Encoding", "")
+        encoded = encoding.split(", ")
         if method == "GET":
             if path == "/":
                 send_response(connect, "200 OK",encoding, "text/plain", "Hello, this is the root.")
             elif path.startswith("/echo/"):
                 pathArr = path.split("/")[-1]
-                if encoding == "gzip":
-                    send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
+                if "gzip" in encoded:
+                    send_response(connect, "200 OK","gzip", "text/plain" , pathArr)
                 else:
                     send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
             elif path == "/user-agent":
