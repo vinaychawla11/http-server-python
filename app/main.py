@@ -19,12 +19,12 @@ def send_response(connect, status_code, encoding, content_type, content):
         response += f"Content-Encoding: {encoding}\r\n"
         response += f"Content-Type: {content_type}\r\n"
         response += f"Content-Length: {len(compressed_content)}\r\n\r\n"
-        response += compressed_content.decode()
+        connect.sendall(response.encode() + compressed_content)
     else:
         response += f"Content-Type: {content_type}\r\n"
         response += f"Content-Length: {len(content)}\r\n\r\n"
         response += content
-    connect.sendall(response.encode())
+        connect.sendall(response.encode())
 
 def handle_client(connect):
     try:
