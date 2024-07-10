@@ -17,10 +17,15 @@ def main():
 def send_response(connect, status_code, encoding, content_type, content):
     response = f"HTTP/1.1 {status_code}\r\n"
     if encoding == "gzip":
+        compressed_content = gzip.compress(content.encode())
         response += f"Content-Encoding: {encoding}\r\n"
-    response += f"Content-Type: {content_type}\r\n"
-    response += f"Content-Length: {len(content)}\r\n\r\n"
-    response += content
+        response += f"Content-Type: {content_type}\r\n"
+        response += f"Content-Length: {len(compressed_content)}\r\n\r\n"
+        response += compressed_content.decode()
+    else:
+        response += f"Content-Type: {content_type}\r\n"
+        response += f"Content-Length: {len(content)}\r\n\r\n"
+        response += content
     connect.sendall(response.encode())
 
 def handle_client(connect):
