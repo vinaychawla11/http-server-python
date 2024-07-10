@@ -19,7 +19,7 @@ def send_response(connect, status_code, encoding, content_type, content):
         response += f"Content-Encoding: {encoding}\r\n"
     response += f"Content-Type: {content_type}\r\n"
     response += f"Content-Length: {len(content)}\r\n\r\n"
-    response += content
+    response += str(gzip.compress(content.encode()))
     connect.sendall(response.encode())
 
 def handle_client(connect):
@@ -41,7 +41,7 @@ def handle_client(connect):
             elif path.startswith("/echo/"):
                 pathArr = path.split("/")[-1]
                 if "gzip" in encoded:
-                    send_response(connect, "200 OK","gzip", "text/plain" , gzip.compress(pathArr.encode()))
+                    send_response(connect, "200 OK","gzip", "text/plain" , pathArr)
                 else:
                     send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
             elif path == "/user-agent":
