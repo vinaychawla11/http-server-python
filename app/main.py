@@ -1,5 +1,7 @@
 import socket
 import threading
+import sys
+import os
 
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -27,6 +29,17 @@ def handle_client(connect):
                 userAgent = data[2].split(":")[1].strip()
                 response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(userAgent)) + "\r\n\r\n" + userAgent + "\r\n"
                 connect.sendall(response2.encode())
+            elif path.startswith("/files/"):
+                filename = path.split("/")[-1]
+                directory = sys.argv[2]
+                filePath = directory + "/" + filename
+                try:
+                    with open(filePath, 'r') as file:
+                        contents = file.read()
+                    response2 = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: "+ str(len(contents)) + "\r\n\r\n" + contents + "\r\n"
+                    connect.sendall(response2.encode())
+                except Exception as e:
+                    connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
             else:
                 connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
     except Exception as e:
