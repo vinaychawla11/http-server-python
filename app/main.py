@@ -10,7 +10,7 @@ def main():
     #
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     requests = server_socket.accept() # wait for client
-    print(requests)
+    print(requests[0])
 
 if __name__ == "__main__":
     main()
