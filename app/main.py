@@ -12,45 +12,54 @@ def main():
         client_thread = threading.Thread(target=handle_client, args=(connect,))
         client_thread.start()
 
+def send_response(connect, status_code, content_type, content):
+    response = f"HTTP/1.1 {status_code}\r\n"
+    response += f"Content-Type: {content_type}\r\n"
+    response += f"Content-Length: {len(content)}\r\n\r\n"
+    response += content
+    connect.sendall(response.encode())
+
 def handle_client(connect):
-    
     try:
-        response = b"HTTP/1.1 200 OK\r\n\r\n"
         data = connect.recv(1024).decode().split("\r\n")
-        method, path,_  = data[0].split()
+        method, path, _  = data[0].split()
+        
         if method == "GET":
             if path == "/":
-                connect.sendall(response)
+                send_response(connect, "200 OK", "text/plain", "Hello, this is the root.")
             elif path.startswith("/echo/"):
                 pathArr = path.split("/")[-1]
-                response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(pathArr)) + "\r\n\r\n" + pathArr + "\r\n"
-                connect.sendall(response2.encode())
+                send_response(connect, "200 OK", "text/plain", pathArr)
             elif path == "/user-agent":
                 userAgent = data[2].split(":")[1].strip()
-                response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(userAgent)) + "\r\n\r\n" + userAgent + "\r\n"
-                connect.sendall(response2.encode())
+                send_response(connect, "200 OK", "text/plain", userAgent)
             elif path.startswith("/files/"):
                 filename = path.split("/")[-1]
                 directory = sys.argv[2]
-                filePath = directory + "/" + filename
+                filePath = os.path.join(directory, filename)
+                
                 try:
                     with open(filePath, 'r') as file:
                         contents = file.read()
-                    response2 = "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: "+ str(len(contents)) + "\r\n\r\n" + contents + "\r\n"
-                    connect.sendall(response2.encode())
-                except Exception as e:
-                    connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+                    send_response(connect, "200 OK", "application/octet-stream", contents)
+                except FileNotFoundError:
+                    send_response(connect, "404 Not Found", "text/plain", "File not found.")
             else:
-                connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+                send_response(connect, "404 Not Found", "text/plain", "Endpoint not found.")
+        
         elif method == "POST":
             if path.startswith("/files/"):
                 filename = path.split("/")[-1]
                 directory = sys.argv[2]
-                filePath = directory + "/" + filename
+                filePath = os.path.join(directory, filename)
                 reqBody = data[-1]
-                connect.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
+                
                 with open(filePath, 'w') as file:
                     file.write(reqBody)
+                send_response(connect, "201 Created", "text/plain", "File created successfully.")
+            else:
+                send_response(connect, "404 Not Found", "text/plain", "Endpoint not found.")
+    
     except Exception as e:
         print(f"Error handling client: {e}")
     finally:
