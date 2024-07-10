@@ -44,7 +44,7 @@ def handle_client(connect):
                 if "gzip" in encoded:
                     send_response(connect, "200 OK","gzip", "text/plain" , str(gzip.compress(pathArr.encode())))
                 else:
-                    send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
+                    send_response(connect, "200 OK","not-gzip", "text/plain" , pathArr)
             elif path == "/user-agent":
                 userAgent = headers["User-Agent"]
                 send_response(connect, "200 OK",encoding, "text/plain", userAgent)
