@@ -12,8 +12,10 @@ def main():
     connect, address = server_socket.accept() # wait for client
     while connect:
         data = connect.recv(1024).decode().split("\r\n");
-        if data.split(" ") == "/":
-            connect.sendall(response)
+        method, path  = data[0].split()
+        if method == "GET":
+            if path == "/":
+                connect.sendall(response)
         else:
             connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
