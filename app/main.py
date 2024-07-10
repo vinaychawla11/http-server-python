@@ -32,18 +32,19 @@ def handle_client(connect):
             key,value = line.split(": ")
             headers[key] = value
         body = data[-1]
+        encoding = headers["Accept-Encoding"]
         if method == "GET":
             if path == "/":
-                send_response(connect, "200 OK", "text/plain", "Hello, this is the root.")
+                send_response(connect, "200 OK",encoding, "text/plain", "Hello, this is the root.")
             elif path.startswith("/echo/"):
                 pathArr = path.split("/")[-1]
-                if headers["Accept-Encoding"] == "gzip":
-                    send_response(connect, "200 OK","gzip", "text/plain" , pathArr)
+                if encoding == "gzip":
+                    send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
                 else:
-                    send_response(connect, "200 OK","not-gzip", "text/plain" , pathArr)
+                    send_response(connect, "200 OK",encoding, "text/plain" , pathArr)
             elif path == "/user-agent":
                 userAgent = headers["User-Agent"]
-                send_response(connect, "200 OK", "text/plain", userAgent)
+                send_response(connect, "200 OK",encoding, "text/plain", userAgent)
             elif path.startswith("/files/"):
                 filename = path.split("/")[-1]
                 directory = sys.argv[2]
@@ -51,11 +52,11 @@ def handle_client(connect):
                 try:
                     with open(filePath, 'r') as file:
                         contents = file.read()
-                    send_response(connect, "200 OK", "application/octet-stream", contents)
+                    send_response(connect, "200 OK", encoding,"application/octet-stream", contents)
                 except FileNotFoundError:
-                    send_response(connect, "404 Not Found", "text/plain", "File not found.")
+                    send_response(connect, "404 Not Found", encoding, "text/plain", "File not found.")
             else:
-                send_response(connect, "404 Not Found", "text/plain", "Endpoint not found.")
+                send_response(connect, "404 Not Found", encoding, "text/plain", "Endpoint not found.")
         
         elif method == "POST":
             if path.startswith("/files/"):
@@ -66,9 +67,9 @@ def handle_client(connect):
                 
                 with open(filePath, 'w') as file:
                     file.write(reqBody)
-                send_response(connect, "201 Created", "text/plain", "File created successfully.")
+                send_response(connect, "201 Created", encoding, "text/plain", "File created successfully.")
             else:
-                send_response(connect, "404 Not Found", "text/plain", "Endpoint not found.")
+                send_response(connect, "404 Not Found", encoding, "text/plain", "Endpoint not found.")
     
     except Exception as e:
         print(f"Error handling client: {e}")
