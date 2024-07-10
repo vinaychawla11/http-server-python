@@ -47,7 +47,7 @@ def handle_client(connect):
                 filename = path.split("/")[-1]
                 directory = sys.argv[2]
                 filePath = directory + "/" + filename
-                reqBody = data[0].split()[-1]
+                reqBody = data[-1]
                 connect.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
                 with open(filePath, 'w') as file:
                     file.write(reqBody)
