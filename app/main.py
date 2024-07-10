@@ -21,7 +21,7 @@ def main():
             response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(pathArr)) + "\r\n\r\n" + pathArr + "\r\n"
             connect.sendall(response2.encode())
         elif path == "/user-agent":
-            userAgent = data[2].split(":").strip()
+            userAgent = data[2].split(":")[1].strip()
             response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(userAgent)) + "\r\n\r\n" + userAgent + "\r\n"
             connect.sendall(response2.encode())
         else:
