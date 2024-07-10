@@ -49,7 +49,7 @@ def handle_client(connect):
                 filePath = directory + "/" + filename
                 reqBody = data[0].split()[-1]
                 connect.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
-                with open(file_path, 'w') as file:
+                with open(filePath, 'w') as file:
                     file.write(reqBody)
     except Exception as e:
         print(f"Error handling client: {e}")
