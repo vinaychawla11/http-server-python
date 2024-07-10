@@ -12,7 +12,7 @@ def main():
     connect, address = server_socket.accept() # wait for client
     while connect:
         data = connect.recv(1024).decode().split("\r\n");
-        method, path  = data[0].split()
+        method, path,_  = data[0].split()
         if method == "GET":
             if path == "/":
                 connect.sendall(response)
