@@ -32,7 +32,10 @@ def handle_client(connect):
             key,value = line.split(": ")
             headers[key] = value
         body = data[-1]
-        encoding = headers["Accept-Encoding"]
+        if headers["Accept-Encoding"]:
+            encoding = headers["Accept-Encoding"]
+        else:
+            encoding = ""
         if method == "GET":
             if path == "/":
                 send_response(connect, "200 OK",encoding, "text/plain", "Hello, this is the root.")
