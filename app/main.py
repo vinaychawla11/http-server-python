@@ -16,7 +16,6 @@ def handle_client(connect):
     try:
         # Uncomment this to pass the first stage
         response = b"HTTP/1.1 200 OK\r\n\r\n"
-        connect, address = server_socket.accept() # wait for client
         data = connect.recv(1024).decode().split("\r\n")
         method, path,_  = data[0].split()
         if method == "GET":
