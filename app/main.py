@@ -12,8 +12,10 @@ def main():
         client_thread = threading.Thread(target=handle_client, args=(connect,))
         client_thread.start()
 
-def send_response(connect, status_code, content_type, content):
+def send_response(connect, status_code, encoding, content_type, content):
     response = f"HTTP/1.1 {status_code}\r\n"
+    if encoding == "gzip":
+        response += f"Content-Encoding: {encoding}\r\n"
     response += f"Content-Type: {content_type}\r\n"
     response += f"Content-Length: {len(content)}\r\n\r\n"
     response += content
@@ -23,21 +25,29 @@ def handle_client(connect):
     try:
         data = connect.recv(1024).decode().split("\r\n")
         method, path, _  = data[0].split()
-        
+        headers = {}
+        for line in data[1,-2]:
+            if not line:
+                break
+            key,value = line.split(":")
+            headers[key] = value
+        body = data[-1]
         if method == "GET":
             if path == "/":
                 send_response(connect, "200 OK", "text/plain", "Hello, this is the root.")
             elif path.startswith("/echo/"):
                 pathArr = path.split("/")[-1]
-                send_response(connect, "200 OK", "text/plain", pathArr)
+                if headers["Accept-Encoding"] == "gzip":
+                    send_response(connect, "200 OK","gzip", "text/plain" , pathArr)
+                else:
+                    send_response(connect, "200 OK","not-gzip", "text/plain" , pathArr)
             elif path == "/user-agent":
-                userAgent = data[2].split(":")[1].strip()
+                userAgent = headers["User-Agent"]
                 send_response(connect, "200 OK", "text/plain", userAgent)
             elif path.startswith("/files/"):
                 filename = path.split("/")[-1]
                 directory = sys.argv[2]
                 filePath = os.path.join(directory, filename)
-                
                 try:
                     with open(filePath, 'r') as file:
                         contents = file.read()
