@@ -27,8 +27,8 @@ def handle_client(connect):
                 userAgent = data[2].split(":")[1].strip()
                 response2 = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ str(len(userAgent)) + "\r\n\r\n" + userAgent + "\r\n"
                 connect.sendall(response2.encode())
-        else:
-            connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+            else:
+                connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
     except Exception as e:
         print(f"Error handling client: {e}")
     finally:
