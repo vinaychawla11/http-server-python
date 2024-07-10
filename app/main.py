@@ -3,14 +3,12 @@ import threading
 import sys
 import os
 import gzip
-import binascii
 
 def main():
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!")
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     while True:
-        connect, address = server_socket.accept() # wait for client
+        connect, address = server_socket.accept()
         client_thread = threading.Thread(target=handle_client, args=(connect,))
         client_thread.start()
 
@@ -36,31 +34,33 @@ def handle_client(connect):
         for line in data[1:-2]:
             if not line:
                 break
-            key,value = line.split(": ")
+            key, value = line.split(": ")
             headers[key] = value
         body = data[-1]
+        
         encoding = headers.get("Accept-Encoding", "")
         encoded = encoding.split(", ")
+        
         if method == "GET":
             if path == "/":
-                send_response(connect, "200 OK",encoding, "text/plain", "Hello, this is the root.")
+                send_response(connect, "200 OK", encoding, "text/plain", "Hello, this is the root.")
             elif path.startswith("/echo/"):
-                pathArr = path.split("/")[-1]
+                path_arr = path.split("/")[-1]
                 if "gzip" in encoded:
-                    send_response(connect, "200 OK","gzip", "text/plain" , str(gzip.compress(pathArr.encode())))
+                    send_response(connect, "200 OK", "gzip", "text/plain", path_arr)
                 else:
-                    send_response(connect, "200 OK","not-gzip", "text/plain" , pathArr)
+                    send_response(connect, "200 OK", "not-gzip", "text/plain", path_arr)
             elif path == "/user-agent":
-                userAgent = headers["User-Agent"]
-                send_response(connect, "200 OK",encoding, "text/plain", userAgent)
+                user_agent = headers.get("User-Agent", "")
+                send_response(connect, "200 OK", encoding, "text/plain", user_agent)
             elif path.startswith("/files/"):
                 filename = path.split("/")[-1]
-                directory = sys.argv[2]
-                filePath = os.path.join(directory, filename)
+                directory = sys.argv[2]  # Ensure to handle directory correctly
+                file_path = os.path.join(directory, filename)
                 try:
-                    with open(filePath, 'r') as file:
+                    with open(file_path, 'r') as file:
                         contents = file.read()
-                    send_response(connect, "200 OK", encoding,"application/octet-stream", contents)
+                    send_response(connect, "200 OK", encoding, "application/octet-stream", contents)
                 except FileNotFoundError:
                     send_response(connect, "404 Not Found", encoding, "text/plain", "File not found.")
             else:
@@ -69,12 +69,11 @@ def handle_client(connect):
         elif method == "POST":
             if path.startswith("/files/"):
                 filename = path.split("/")[-1]
-                directory = sys.argv[2]
-                filePath = os.path.join(directory, filename)
-                reqBody = data[-1]
-                
-                with open(filePath, 'w') as file:
-                    file.write(reqBody)
+                directory = sys.argv[2]  # Ensure to handle directory correctly
+                file_path = os.path.join(directory, filename)
+                req_body = data[-1]
+                with open(file_path, 'w') as file:
+                    file.write(req_body)
                 send_response(connect, "201 Created", encoding, "text/plain", "File created successfully.")
             else:
                 send_response(connect, "404 Not Found", encoding, "text/plain", "Endpoint not found.")
