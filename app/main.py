@@ -42,6 +42,15 @@ def handle_client(connect):
                     connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
             else:
                 connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+        elif method == "POST":
+            if path.startswith("/files/"):
+                filename = path.split("/")[-1]
+                directory = sys.argv[2]
+                filePath = directory + "/" + filename
+                reqBody = data[0].split()[-1]
+                connect.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
+                with open(file_path, 'w') as file:
+                    file.write(reqBody)
     except Exception as e:
         print(f"Error handling client: {e}")
     finally:
