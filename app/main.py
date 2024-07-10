@@ -16,6 +16,10 @@ def main():
     if method == "GET":
         if path == "/":
             connect.sendall(response)
+        elif path.startswith("/echo/"):
+            pathArr = path.split("/")[-1]
+            response2 = b"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+ len(pathArr) + "\r\n" + pathArr + "\r\n"
+            connect.sendall(response2)
         else:
             connect.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
