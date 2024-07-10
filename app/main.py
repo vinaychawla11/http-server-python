@@ -26,7 +26,7 @@ def handle_client(connect):
         data = connect.recv(1024).decode().split("\r\n")
         method, path, _  = data[0].split()
         headers = {}
-        for line in data[1,-2]:
+        for line in data[1:-2]:
             if not line:
                 break
             key,value = line.split(":")
