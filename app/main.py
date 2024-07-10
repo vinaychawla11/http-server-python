@@ -1,4 +1,3 @@
-# Uncomment this to pass the first stage
 import socket
 import threading
 
@@ -14,7 +13,6 @@ def main():
 def handle_client(connect):
     
     try:
-        # Uncomment this to pass the first stage
         response = b"HTTP/1.1 200 OK\r\n\r\n"
         data = connect.recv(1024).decode().split("\r\n")
         method, path,_  = data[0].split()
